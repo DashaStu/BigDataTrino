@@ -64,7 +64,7 @@ services:
       - -c
       - |
         echo "Waiting for Trino..."
-        while ! trino --server trino_lab4:8080 --execute "SELECT 1" >/dev/null 2>&1; do
+        while ! trino --server trino-lab4:8080 --execute "SELECT 1" >/dev/null 2>&1; do
           sleep 5
         done
         echo "Trino is ready. Starting ETL..."
