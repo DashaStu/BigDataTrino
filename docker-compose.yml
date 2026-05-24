@@ -36,7 +36,7 @@ services:
       - trino-network
 
   trino-lab4:
-    image: trinodb/trino:435 # Фиксируем версию как у коллеги
+    image: trinodb/trino:435
     container_name: trino_lab4_container
     ports:
       - "8081:8080"
@@ -49,7 +49,6 @@ services:
     networks:
       - trino-network
 
-  # Этот сервис сам все запустит!
   trino-runner:
     image: trinodb/trino:435
     container_name: trino_runner_container
