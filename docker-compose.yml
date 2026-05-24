@@ -1,0 +1,73 @@
+version: '3.8'
+
+networks:
+  trino-network:
+    driver: bridge
+
+services:
+  pg_lab4:
+    image: postgres:15
+    container_name: pg_lab4_container
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: source_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres_init:/docker-entrypoint-initdb.d
+      - ./data/pg_data:/tmp/pg_data
+    networks:
+      - trino-network
+
+  ch_lab4:
+    image: clickhouse/clickhouse-server:23.8
+    container_name: ch_lab4_container
+    environment:
+      CLICKHOUSE_USER: user
+      CLICKHOUSE_PASSWORD: password
+      CLICKHOUSE_DB: target_db
+    ports:
+      - "8124:8123"
+    volumes:
+      - ./clickhouse_init:/docker-entrypoint-initdb.d
+      - ./data/ch_data:/tmp/ch_data
+    networks:
+      - trino-network
+
+  trino_lab4:
+    image: trinodb/trino:435 # Фиксируем версию как у коллеги
+    container_name: trino_lab4_container
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./trino_etc/catalog:/etc/trino/catalog
+      - ./scripts:/scripts
+    depends_on:
+      - pg_lab4
+      - ch_lab4
+    networks:
+      - trino-network
+
+  # Этот сервис сам все запустит!
+  trino-runner:
+    image: trinodb/trino:435
+    container_name: trino_runner_container
+    depends_on:
+      - trino_lab4
+    volumes:
+      - ./scripts:/scripts
+    networks:
+      - trino-network
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        echo "Waiting for Trino..."
+        while ! trino --server trino_lab4:8080 --execute "SELECT 1" >/dev/null 2>&1; do
+          sleep 5
+        done
+        echo "Trino is ready. Starting ETL..."
+        trino --server trino_lab4:8080 --file /scripts/transform_star.sql
+        trino --server trino_lab4:8080 --file /scripts/create_reports.sql
+        echo "=== ALL DONE! CHECK CLICKHOUSE NOW ==="
