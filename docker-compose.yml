@@ -5,7 +5,7 @@ networks:
     driver: bridge
 
 services:
-  pg_lab4:
+  pg-lab4:
     image: postgres:15
     container_name: pg_lab4_container
     environment:
@@ -20,7 +20,7 @@ services:
     networks:
       - trino-network
 
-  ch_lab4:
+  ch-lab4:
     image: clickhouse/clickhouse-server:23.8
     container_name: ch_lab4_container
     environment:
@@ -35,7 +35,7 @@ services:
     networks:
       - trino-network
 
-  trino_lab4:
+  trino-lab4:
     image: trinodb/trino:435 # Фиксируем версию как у коллеги
     container_name: trino_lab4_container
     ports:
@@ -44,8 +44,8 @@ services:
       - ./trino_etc/catalog:/etc/trino/catalog
       - ./scripts:/scripts
     depends_on:
-      - pg_lab4
-      - ch_lab4
+      - pg-lab4
+      - ch-lab4
     networks:
       - trino-network
 
@@ -54,7 +54,7 @@ services:
     image: trinodb/trino:435
     container_name: trino_runner_container
     depends_on:
-      - trino_lab4
+      - trino-lab4
     volumes:
       - ./scripts:/scripts
     networks:
