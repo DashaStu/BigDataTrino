@@ -67,6 +67,6 @@ services:
           sleep 5
         done
         echo "Trino is ready. Starting ETL..."
-        trino --server trino_lab4:8080 --file /scripts/transform_star.sql
-        trino --server trino_lab4:8080 --file /scripts/create_reports.sql
+        trino --server trino-lab4:8080 --file /scripts/transform_star.sql
+        trino --server trino-lab4:8080 --file /scripts/create_reports.sql
         echo "=== ALL DONE! CHECK CLICKHOUSE NOW ==="
